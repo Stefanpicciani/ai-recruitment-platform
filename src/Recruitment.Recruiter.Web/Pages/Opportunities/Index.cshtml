@@ -1,0 +1,59 @@
+@page
+@model Recruitment.Recruiter.Web.Pages.Opportunities.IndexModel
+@{
+    ViewData["Title"] = "Oportunidades";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Oportunidades</h1>
+    <a class="btn btn-primary" asp-page="Edit">+ Nova oportunidade</a>
+</div>
+
+<form method="get" class="row g-2 align-items-center mb-3">
+    <div class="col-sm-6 col-md-4">
+        <input class="form-control" asp-for="Q" placeholder="Pesquisar por título, departamento ou local" />
+    </div>
+    <div class="col-auto form-check ms-2">
+        <input class="form-check-input" type="checkbox" asp-for="ShowInactive" onchange="this.form.submit()" />
+        <label class="form-check-label" asp-for="ShowInactive">Incluir inativas</label>
+    </div>
+    <div class="col-auto"><button class="btn btn-outline-primary">Filtrar</button></div>
+</form>
+
+<div class="card">
+    @if (Model.Items.Count == 0)
+    {
+        <div class="card-body text-muted">Nenhuma oportunidade encontrada.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr><th>Título</th><th>Departamento</th><th>Local</th><th>Tipo</th><th class="text-center">Skills</th><th class="text-center">CVs</th><th>Estado</th><th></th></tr>
+                </thead>
+                <tbody>
+                @foreach (var o in Model.Items)
+                {
+                    <tr>
+                        <td><a asp-page="Details" asp-route-id="@o.Id" class="fw-semibold">@o.Title</a></td>
+                        <td>@o.Department</td>
+                        <td>@o.Location</td>
+                        <td>@o.EmploymentType</td>
+                        <td class="text-center">@o.Skills</td>
+                        <td class="text-center">@o.Resumes</td>
+                        <td>
+                            @if (o.IsActive) { <span class="badge text-bg-success">Ativa</span> }
+                            else { <span class="badge text-bg-secondary">Inativa</span> }
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-primary" asp-page="/Resumes/Submit" asp-route-opportunityId="@o.Id">Submeter CV</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-page="Edit" asp-route-id="@o.Id">Editar</a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

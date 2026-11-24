@@ -1,0 +1,32 @@
+@page "{id:int}"
+@model Recruitment.Recruiter.Web.Pages.Candidates.DetailsModel
+@{
+    var c = Model.Candidate;
+    ViewData["Title"] = c.FullName;
+}
+
+<h1 class="h3 mb-1">@c.FullName</h1>
+<div class="text-muted mb-3">
+    @c.Email @if (!string.IsNullOrEmpty(c.Phone)) { <span>· @c.Phone</span> }
+    · registado em @c.CreatedAt.ToString("yyyy-MM-dd")
+</div>
+
+<div class="card">
+    <div class="card-header bg-white fw-semibold">Currículos (@c.Resumes.Count)</div>
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead><tr><th>Oportunidade</th><th>Ficheiro</th><th>Tamanho</th><th>Submetido</th></tr></thead>
+            <tbody>
+            @foreach (var r in c.Resumes.OrderByDescending(r => r.SubmittedAt))
+            {
+                <tr>
+                    <td><a asp-page="/Opportunities/Details" asp-route-id="@r.OpportunityId">@r.Opportunity!.Title</a></td>
+                    <td><a asp-page="/Resumes/Download" asp-route-id="@r.Id">@r.OriginalFileName</a></td>
+                    <td>@((r.FileSize / 1024.0).ToString("0")) KB</td>
+                    <td>@r.SubmittedAt.ToString("yyyy-MM-dd HH:mm") UTC</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

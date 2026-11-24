@@ -1,0 +1,44 @@
+@page
+@model Recruitment.Recruiter.Web.Pages.Candidates.IndexModel
+@{
+    ViewData["Title"] = "Candidatos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Candidatos</h1>
+    <a class="btn btn-primary" asp-page="/Resumes/Submit">Submeter CV</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-sm-6 col-md-4">
+        <input class="form-control" asp-for="Q" placeholder="Pesquisar por nome ou email" />
+    </div>
+    <div class="col-auto"><button class="btn btn-outline-primary">Pesquisar</button></div>
+</form>
+
+<div class="card">
+    @if (Model.Items.Count == 0)
+    {
+        <div class="card-body text-muted">Nenhum candidato encontrado.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th class="text-center">CVs</th><th>Última submissão</th></tr></thead>
+                <tbody>
+                @foreach (var c in Model.Items)
+                {
+                    <tr>
+                        <td><a asp-page="Details" asp-route-id="@c.Id" class="fw-semibold">@c.FullName</a></td>
+                        <td>@c.Email</td>
+                        <td>@c.Phone</td>
+                        <td class="text-center">@c.Resumes</td>
+                        <td>@(c.LastSubmission?.ToString("yyyy-MM-dd HH:mm") ?? "—")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

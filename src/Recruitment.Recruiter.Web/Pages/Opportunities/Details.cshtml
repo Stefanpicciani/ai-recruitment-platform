@@ -1,0 +1,85 @@
+@page "{id:int}"
+@model Recruitment.Recruiter.Web.Pages.Opportunities.DetailsModel
+@{
+    var o = Model.Opportunity;
+    ViewData["Title"] = o.Title;
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+    <div>
+        <h1 class="h3 mb-1">@o.Title
+            @if (o.IsActive) { <span class="badge text-bg-success align-middle fs-6">Ativa</span> }
+            else { <span class="badge text-bg-secondary align-middle fs-6">Inativa</span> }
+        </h1>
+        <div class="text-muted">
+            @string.Join(" · ", new[] { o.Department, o.Location, o.EmploymentType }.Where(s => !string.IsNullOrWhiteSpace(s)))
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" asp-page="/Resumes/Submit" asp-route-opportunityId="@o.Id">Submeter CV</a>
+        <a class="btn btn-outline-secondary" asp-page="Edit" asp-route-id="@o.Id">Editar</a>
+        <form method="post" asp-page-handler="ToggleActive" asp-route-id="@o.Id">
+            <button class="btn btn-outline-@(o.IsActive ? "danger" : "success")">@(o.IsActive ? "Desativar" : "Reativar")</button>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header bg-white fw-semibold">Descrição</div>
+            <div class="card-body pre-wrap">@o.Description</div>
+            @if (!string.IsNullOrWhiteSpace(o.Requirements))
+            {
+                <div class="card-header bg-white fw-semibold border-top">Requisitos</div>
+                <div class="card-body pre-wrap">@o.Requirements</div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-white fw-semibold">Competências</div>
+            <div class="card-body">
+                @if (o.RequiredSkills.Count == 0)
+                {
+                    <span class="text-muted">Sem competências definidas.</span>
+                }
+                @foreach (var s in o.RequiredSkills.OrderByDescending(s => s.IsMandatory).ThenBy(s => s.Name))
+                {
+                    <span class="badge rounded-pill @(s.IsMandatory ? "text-bg-success" : "text-bg-light border") me-1 mb-1 fs-6 fw-normal">
+                        @s.Name
+                    </span>
+                }
+                <div class="small text-muted mt-2">Verde = obrigatória · Cinza = desejável</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white fw-semibold">Currículos submetidos (@Model.Resumes.Count)</div>
+    @if (Model.Resumes.Count == 0)
+    {
+        <div class="card-body text-muted">Ainda não foram submetidos currículos para esta oportunidade.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead><tr><th>Candidato</th><th>Email</th><th>Ficheiro</th><th>Tamanho</th><th>Submetido</th></tr></thead>
+                <tbody>
+                @foreach (var r in Model.Resumes)
+                {
+                    <tr>
+                        <td><a asp-page="/Candidates/Details" asp-route-id="@r.CandidateId">@r.Candidate!.FullName</a></td>
+                        <td>@r.Candidate!.Email</td>
+                        <td><a asp-page="/Resumes/Download" asp-route-id="@r.Id">@r.OriginalFileName</a></td>
+                        <td>@((r.FileSize / 1024.0).ToString("0")) KB</td>
+                        <td>@r.SubmittedAt.ToString("yyyy-MM-dd HH:mm") UTC</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

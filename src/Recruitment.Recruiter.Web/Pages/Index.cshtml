@@ -1,0 +1,61 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Início";
+}
+
+<h1 class="h3 mb-4">Gestão de oportunidades e currículos</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card p-3">
+            <div class="text-muted">Oportunidades ativas</div>
+            <div class="stat-value">@Model.ActiveOpportunities</div>
+            <a asp-page="/Opportunities/Index">Ver oportunidades →</a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card p-3">
+            <div class="text-muted">Candidatos</div>
+            <div class="stat-value">@Model.Candidates</div>
+            <a asp-page="/Candidates/Index">Ver candidatos →</a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card p-3">
+            <div class="text-muted">Currículos submetidos</div>
+            <div class="stat-value">@Model.Resumes</div>
+            <a asp-page="/Resumes/Submit">Submeter currículo →</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white fw-semibold">Submissões recentes</div>
+    @if (Model.RecentResumes.Count == 0)
+    {
+        <div class="card-body text-muted">
+            Ainda não há currículos. Comece por <a asp-page="/Opportunities/Edit">criar uma oportunidade</a>
+            e depois <a asp-page="/Resumes/Submit">submeter um currículo</a>.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead><tr><th>Candidato</th><th>Oportunidade</th><th>Ficheiro</th><th>Submetido</th></tr></thead>
+                <tbody>
+                @foreach (var r in Model.RecentResumes)
+                {
+                    <tr>
+                        <td><a asp-page="/Candidates/Details" asp-route-id="@r.CandidateId">@r.Candidate!.FullName</a></td>
+                        <td><a asp-page="/Opportunities/Details" asp-route-id="@r.OpportunityId">@r.Opportunity!.Title</a></td>
+                        <td><a asp-page="/Resumes/Download" asp-route-id="@r.Id">@r.OriginalFileName</a></td>
+                        <td>@r.SubmittedAt.ToString("yyyy-MM-dd HH:mm") UTC</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

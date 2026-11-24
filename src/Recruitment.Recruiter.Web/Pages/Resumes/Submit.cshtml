@@ -1,0 +1,63 @@
+@page
+@model Recruitment.Recruiter.Web.Pages.Resumes.SubmitModel
+@using Recruitment.Recruiter.Web.Storage
+@{
+    ViewData["Title"] = "Submeter currículo";
+}
+
+<h1 class="h3 mb-3">Submeter currículo</h1>
+
+@if (!Model.Opportunities.Any())
+{
+    <div class="alert alert-warning">
+        Não existem oportunidades ativas. <a asp-page="/Opportunities/Edit">Crie uma oportunidade</a> antes de submeter currículos.
+    </div>
+}
+else
+{
+    <form method="post" enctype="multipart/form-data" class="card">
+        <div class="card-body row g-3">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="col-12">
+                <label asp-for="Input.OpportunityId" class="form-label"></label>
+                <select asp-for="Input.OpportunityId" asp-items="Model.Opportunities" class="form-select">
+                    <option value="">— Selecione —</option>
+                </select>
+                <span asp-validation-for="Input.OpportunityId" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.FullName" class="form-label"></label>
+                <input asp-for="Input.FullName" class="form-control" autocomplete="off" />
+                <span asp-validation-for="Input.FullName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.Email" class="form-label"></label>
+                <input asp-for="Input.Email" class="form-control" autocomplete="off" />
+                <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                <div class="form-text">Se o email já existir, o candidato é reutilizado e os dados atualizados.</div>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.Phone" class="form-label"></label>
+                <input asp-for="Input.Phone" class="form-control" autocomplete="off" />
+                <span asp-validation-for="Input.Phone" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.File" class="form-label"></label>
+                <input asp-for="Input.File" type="file" class="form-control" accept="@ResumeRules.AcceptAttribute" />
+                <span asp-validation-for="Input.File" class="text-danger small"></span>
+            </div>
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Submeter</button>
+            <a class="btn btn-outline-secondary" asp-page="/Opportunities/Index">Cancelar</a>
+        </div>
+    </form>
+    <p class="small text-muted mt-2">
+        Os currículos contêm dados pessoais: são guardados em armazenamento privado e só são acessíveis através desta aplicação.
+    </p>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

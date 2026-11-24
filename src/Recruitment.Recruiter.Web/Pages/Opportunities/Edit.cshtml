@@ -1,0 +1,120 @@
+@page "{id:int?}"
+@model Recruitment.Recruiter.Web.Pages.Opportunities.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Nova oportunidade" : "Editar oportunidade";
+}
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <div class="card mb-3">
+        <div class="card-body row g-3">
+            <div class="col-md-8">
+                <label asp-for="Input.Title" class="form-label"></label>
+                <input asp-for="Input.Title" class="form-control" placeholder="ex.: Senior .NET Developer" />
+                <span asp-validation-for="Input.Title" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Input.EmploymentType" class="form-label"></label>
+                <select asp-for="Input.EmploymentType" class="form-select"
+                        asp-items="@(new SelectList(Recruitment.Recruiter.Web.Pages.Opportunities.EditModel.EmploymentTypes))"></select>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.Department" class="form-label"></label>
+                <input asp-for="Input.Department" class="form-control" placeholder="ex.: Engenharia" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.Location" class="form-label"></label>
+                <input asp-for="Input.Location" class="form-control" placeholder="ex.: Lisboa · Híbrido" />
+            </div>
+            <div class="col-12">
+                <label asp-for="Input.Description" class="form-label"></label>
+                <textarea asp-for="Input.Description" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Input.Description" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Input.Requirements" class="form-label"></label>
+                <textarea asp-for="Input.Requirements" class="form-control" rows="4"
+                          placeholder="Experiência, formação, idiomas, etc."></textarea>
+            </div>
+            <div class="col-12 form-check ms-2">
+                <input asp-for="Input.IsActive" class="form-check-input" />
+                <label asp-for="Input.IsActive" class="form-check-label"></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Competências técnicas (Required Skills)</span>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="add-skill">+ Adicionar</button>
+        </div>
+        <div class="card-body" id="skills">
+            @for (var i = 0; i < Model.Input.Skills.Count; i++)
+            {
+                <div class="row g-2 align-items-center mb-2 skill-row">
+                    <div class="col">
+                        <input name="Input.Skills[@i].Name" value="@Model.Input.Skills[i].Name" class="form-control" placeholder="ex.: C#, Azure, SQL Server" maxlength="100" />
+                    </div>
+                    <div class="col-auto form-check">
+                        <input type="checkbox" name="Input.Skills[@i].IsMandatory" value="true" class="form-check-input" @(Model.Input.Skills[i].IsMandatory ? "checked" : "") />
+                        <label class="form-check-label">Obrigatória</label>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-skill" aria-label="Remover">✕</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a class="btn btn-outline-secondary" asp-page="@(Model.IsNew ? "Index" : "Details")" asp-route-id="@Model.Id">Cancelar</a>
+    </div>
+</form>
+
+<template id="skill-template">
+    <div class="row g-2 align-items-center mb-2 skill-row">
+        <div class="col"><input class="form-control" data-field="Name" placeholder="ex.: C#, Azure, SQL Server" maxlength="100" /></div>
+        <div class="col-auto form-check">
+            <input type="checkbox" class="form-check-input" data-field="IsMandatory" value="true" checked />
+            <label class="form-check-label">Obrigatória</label>
+        </div>
+        <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-danger remove-skill" aria-label="Remover">✕</button></div>
+    </div>
+</template>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const container = document.getElementById('skills');
+            const tpl = document.getElementById('skill-template');
+
+            function renumber() {
+                container.querySelectorAll('.skill-row').forEach((row, i) => {
+                    row.querySelectorAll('input').forEach(input => {
+                        const field = input.dataset.field || input.name.replace(/^.*\]\./, '');
+                        input.dataset.field = field;
+                        input.name = `Input.Skills[${i}].${field}`;
+                    });
+                });
+            }
+
+            document.getElementById('add-skill').addEventListener('click', () => {
+                container.appendChild(tpl.content.cloneNode(true));
+                renumber();
+                container.querySelector('.skill-row:last-child input').focus();
+            });
+
+            container.addEventListener('click', e => {
+                if (!e.target.classList.contains('remove-skill')) return;
+                e.target.closest('.skill-row').remove();
+                renumber();
+            });
+        })();
+    </script>
+}

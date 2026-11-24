@@ -1,0 +1,29 @@
+# Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.rsuser
+
+# Azure Developer CLI (environment values, may include subscription info)
+.azure/
+
+# Local data: uploaded CVs contain personal data, never commit them
+App_Data/
+
+# Local secrets / env
+.env
+*.env
+appsettings.*.local.json
+
+# OS
+Thumbs.db
+.DS_Store

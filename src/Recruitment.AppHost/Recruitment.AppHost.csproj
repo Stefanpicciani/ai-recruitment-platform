@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>7389f34e-e410-4710-8199-44beb5f8f6c2</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="17.0.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.AppService" Version="17.0.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.Sql" Version="17.0.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="17.0.0" />
+    <PackageReference Include="Aspire.Hosting.Dotnet" Version="17.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Recruitment.Recruiter.Web\Recruitment.Recruiter.Web.csproj" />
+  </ItemGroup>
+
+</Project>

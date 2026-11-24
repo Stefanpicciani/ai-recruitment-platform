@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Recruitment.AppHost/Recruitment.AppHost.csproj" />
+    <Project Path="src/Recruitment.Recruiter.Web/Recruitment.Recruiter.Web.csproj" />
+    <Project Path="src/Recruitment.ServiceDefaults/Recruitment.ServiceDefaults.csproj" />
+  </Folder>
+</Solution>
