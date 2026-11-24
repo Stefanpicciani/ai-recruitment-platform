@@ -2,6 +2,9 @@
 
 ASP.NET Core (.NET 10, Razor Pages) + **Aspire 17** + **Azure SQL Database** + **Azure Blob Storage**, alojado em **Azure App Service**.
 
+> **Para retomar o projeto, ler primeiro o [guia passo a passo](docs/GUIA.md)**: como funciona, onde a app lê a
+> configuração, onde mudar as connection strings (local e Azure), deploy e problemas conhecidos.
+
 ```
 Recruitment.slnx
 src/
