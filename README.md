@@ -83,12 +83,43 @@ Não precisa de Docker. Por omissão usa LocalDB e a pasta `App_Data/resumes`.
 dotnet run --project src/Recruitment.AppHost
 ```
 
-Para usar os recursos do Azure a partir do PC, guardar as connection strings em user-secrets do AppHost:
+### User-secrets (Azure SQL + Blob Storage a partir do PC)
+
+Para usar os recursos do Azure a partir do PC, guardar as connection strings em user-secrets do AppHost.
+Correr na raiz do repositório, **substituindo o texto entre `< >` pelos valores reais**:
 
 ```powershell
 dotnet user-secrets set "ConnectionStrings:recruiterdb" "<connection string Azure SQL>" --project src/Recruitment.AppHost
+```
+
+```powershell
 dotnet user-secrets set "ConnectionStrings:resumes" "<connection string ou URL da Storage Account>" --project src/Recruitment.AppHost
 ```
+
+Onde encontrar os valores no portal:
+
+- **Azure SQL**: *SQL database → Settings → Connection strings → ADO.NET* (substituir `{your_password}`).
+- **Storage Account**: *Security + networking → Access keys → key1 → Connection string* (Show + copiar),
+  ou o URL em *Settings → Endpoints → Blob service* (`https://<conta>.blob.core.windows.net/`, requer o role
+  "Storage Blob Data Contributor" para o teu utilizador).
+
+Ver, editar ou apagar os valores guardados:
+
+```powershell
+dotnet user-secrets list --project src/Recruitment.AppHost
+```
+
+```powershell
+notepad "$env:APPDATA\Microsoft\UserSecrets\7389f34e-e410-4710-8199-44beb5f8f6c2\secrets.json"
+```
+
+```powershell
+dotnet user-secrets remove "ConnectionStrings:resumes" --project src/Recruitment.AppHost
+```
+
+Os user-secrets ficam fora do repositório (`%APPDATA%\Microsoft\UserSecrets\<UserSecretsId>\secrets.json`) e
+nunca são enviados para o Azure. Sem estas chaves a app volta a usar LocalDB e a pasta `App_Data/resumes`.
+Depois de alterar, reiniciar a app; no log de arranque aparece `CV storage: Azure Blob Storage, account '...'`.
 
 Sem Aspire (ex.: F5 direto no projeto Web), as mesmas chaves funcionam em user-secrets do projeto Web
 (`--project src/Recruitment.Recruiter.Web`).
