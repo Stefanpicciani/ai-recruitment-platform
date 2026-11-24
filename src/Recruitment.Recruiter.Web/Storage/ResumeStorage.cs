@@ -16,6 +16,9 @@ public interface IResumeStorage
 
     /// <summary>Removes a stored file (used to roll back when the database save fails). No-op if it doesn't exist.</summary>
     Task DeleteAsync(string storedPath, CancellationToken ct = default);
+
+    /// <summary>Where files go, for the startup log (never includes keys).</summary>
+    string Describe();
 }
 
 /// <summary>Azure Blob Storage (used when the "resumes" blob connection is configured, e.g. in Azure).</summary>
@@ -53,6 +56,8 @@ public sealed class BlobResumeStorage(BlobContainerClient container) : IResumeSt
         if (BlobName(storedPath) is { } name)
             await container.GetBlobClient(name).DeleteIfExistsAsync(cancellationToken: ct);
     }
+
+    public string Describe() => $"Azure Blob Storage, account '{container.AccountName}', container '{container.Name}'";
 
     private string? BlobName(string storedPath)
     {
@@ -104,6 +109,8 @@ public sealed class FileSystemResumeStorage(IConfiguration config, IWebHostEnvir
         if (full is not null && File.Exists(full)) File.Delete(full);
         return Task.CompletedTask;
     }
+
+    public string Describe() => $"local folder '{_root}' (Development only)";
 
     private string? FullPath(string storedPath) =>
         storedPath.StartsWith(Prefix, StringComparison.Ordinal)
