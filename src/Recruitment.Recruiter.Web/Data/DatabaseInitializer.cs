@@ -45,17 +45,8 @@ public static partial class DatabaseInitializer
     {
         // 1) Can we open the database itself? Then it exists – nothing to do.
         //    (On Azure SQL this is always the path taken: the app identity may not even have access to master.)
-        try
-        {
-            await using var probe = new SqlConnection(connectionString);
-            await probe.OpenAsync(ct);
-            logger.LogInformation("Database '{Database}' already exists.", probe.Database);
+        if (await DatabaseExistsAsync(connectionString, logger, ct))
             return;
-        }
-        catch (SqlException ex) when (ex.Errors.Cast<SqlError>().Any(e => e.Number == CannotOpenDatabase))
-        {
-            // Database not found on the server: continue below.
-        }
 
         var target = new SqlConnectionStringBuilder(connectionString);
         var dbName = target.InitialCatalog;
@@ -126,6 +117,52 @@ public static partial class DatabaseInitializer
         await ExecAsync(master, sql, ct, ("@name", dbName));
         logger.LogInformation("Database '{Database}' is ready.", dbName);
     }
+
+    /// <summary>
+    /// Opens the database itself. True if it exists, false if the server says it doesn't (4060).
+    /// Azure SQL serverless databases pause when idle and take up to a minute to resume, so the first
+    /// connection may time out or return "database not available": those errors are retried.
+    /// </summary>
+    private static async Task<bool> DatabaseExistsAsync(string connectionString, ILogger logger, CancellationToken ct)
+    {
+        var probeCs = new SqlConnectionStringBuilder(connectionString);
+        if (probeCs.ConnectTimeout < MinProbeTimeoutSeconds) probeCs.ConnectTimeout = MinProbeTimeoutSeconds;
+
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                await using var probe = new SqlConnection(probeCs.ConnectionString);
+                await probe.OpenAsync(ct);
+                logger.LogInformation("Database '{Database}' already exists.", probe.Database);
+                return true;
+            }
+            catch (SqlException ex) when (HasError(ex, CannotOpenDatabase))
+            {
+                return false; // Database not found on the server.
+            }
+            catch (SqlException ex) when (attempt < ProbeAttempts && IsTransient(ex))
+            {
+                logger.LogWarning("Database not reachable yet (attempt {Attempt}/{Max}, error {Number}): {Message}. " +
+                                  "An idle Azure SQL serverless database may be resuming; retrying in {Delay}s.",
+                    attempt, ProbeAttempts, ex.Number, ex.Message.Split('\n')[0], ProbeRetryDelay.TotalSeconds);
+                SqlConnection.ClearPool(new SqlConnection(probeCs.ConnectionString));
+                await Task.Delay(ProbeRetryDelay, ct);
+            }
+        }
+    }
+
+    private const int MinProbeTimeoutSeconds = 60;
+    private const int ProbeAttempts = 5;
+    private static readonly TimeSpan ProbeRetryDelay = TimeSpan.FromSeconds(10);
+
+    // -2 timeout; 40613/40197/40501/49918-49920 Azure SQL "not available / busy / resuming"; 10928/10929 resource limits;
+    // 4221 login timed out waiting for a secondary; 233/64/10053/10054/10060 network.
+    private static readonly HashSet<int> TransientErrors =
+        [-2, 64, 233, 4221, 10053, 10054, 10060, 10928, 10929, 40197, 40501, 40613, 49918, 49919, 49920];
+
+    private static bool HasError(SqlException ex, int number) => ex.Errors.Cast<SqlError>().Any(e => e.Number == number);
+    private static bool IsTransient(SqlException ex) => ex.Errors.Cast<SqlError>().Any(e => TransientErrors.Contains(e.Number));
 
     // ---------------------------------------------------------------- schema
 

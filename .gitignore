@@ -27,3 +27,4 @@ appsettings.*.local.json
 # OS
 Thumbs.db
 .DS_Store
+test-files/
